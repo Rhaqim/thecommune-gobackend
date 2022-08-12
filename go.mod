@@ -1,4 +1,4 @@
-module thecommune/backend
+module github.com/Rhaqim/thecommune-gobackend
 
 go 1.19
 
