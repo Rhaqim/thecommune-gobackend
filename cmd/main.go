@@ -19,7 +19,8 @@ func main() {
 	router.HandleFunc("/movies/{id}", views.UpdateMovie).Methods("PUT")
 	router.HandleFunc("/movies/{id}", views.DeleteMovie).Methods("DELETE")
 	router.HandleFunc("/movies/", views.DeleteMovies).Methods("DELETE")
-	router.HandleFunc("/restaurants", views.Restaurants).Methods("GET")
+	router.HandleFunc("/restaurants/", views.Restaurants).Methods("GET")
+	router.HandleFunc("/restaurant/", views.GetRestaurantByName).Methods("POST")
 
 	fmt.Println("Server is running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
