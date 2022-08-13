@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Rhaqim/thecommune-gobackend/config"
+	"github.com/Rhaqim/thecommune-gobackend/pkg/config"
 )
 
 func SetupDB() *sql.DB {

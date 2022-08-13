@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Rhaqim/thecommune-gobackend/views"
+	"github.com/Rhaqim/thecommune-gobackend/pkg/views"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )

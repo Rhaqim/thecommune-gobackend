@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Rhaqim/thecommune-gobackend/config"
-	"github.com/Rhaqim/thecommune-gobackend/database"
+	"github.com/Rhaqim/thecommune-gobackend/pkg/config"
+	"github.com/Rhaqim/thecommune-gobackend/pkg/database"
 	"github.com/gorilla/mux"
 )
 

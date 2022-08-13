@@ -6,9 +6,14 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Rhaqim/thecommune-gobackend/config"
-	"github.com/Rhaqim/thecommune-gobackend/database"
+	"github.com/Rhaqim/thecommune-gobackend/pkg/config"
+	"github.com/Rhaqim/thecommune-gobackend/pkg/database"
 	"go.mongodb.org/mongo-driver/bson"
+)
+
+const (
+	restaurantCollection = "the_commune_test"
+	restaurantDB         = "lagos_restaurants"
 )
 
 type MongoJsonResponse struct {
@@ -23,7 +28,7 @@ func Restaurants(w http.ResponseWriter, r *http.Request) {
 
 	defer client.Disconnect(context.TODO())
 
-	collection := client.Database("lagos_restaurants").Collection("the_commune_test")
+	collection := client.Database(restaurantDB).Collection(restaurantCollection)
 
 	var restaurants bson.M
 
@@ -59,7 +64,7 @@ func GetRestaurantByName(w http.ResponseWriter, r *http.Request) {
 
 	defer client.Disconnect(context.TODO())
 
-	collection := client.Database("lagos_restaurants").Collection("the_commune_test")
+	collection := client.Database(restaurantDB).Collection(restaurantCollection)
 
 	var restaurants bson.M
 
@@ -86,7 +91,7 @@ func CreateRestaurant(w http.ResponseWriter, r *http.Request) {
 
 	defer client.Disconnect(context.TODO())
 
-	collection := client.Database("lagos_restaurants").Collection("the_commune_test")
+	collection := client.Database(restaurantDB).Collection(restaurantCollection)
 
 	var restaurants bson.M
 
