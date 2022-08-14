@@ -58,24 +58,26 @@ func GetRestaurantReviews(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type UpdateRestaurantReviewRequest struct {
-	Name string `json:"name"`
+/*
+Add A New Restaurant Review
+*/
+
+type AddRestaurantReviewRequest struct {
+	Reviewer primitive.ObjectID `json:"reviewer"`
 
 	Review string `json:"review"`
 
-	Rating string `json:"rating"`
+	Rating int `json:"rating"`
+
+	Spent int `json:"spent"`
+
+	Review_Images []string `json:"review_images"`
 
 	Restaurant_ID primitive.ObjectID `json:"restaurant_id"`
 
 	Dislike int `json:"dislike"`
 
 	Like int `json:"like"`
-
-	Spent int `json:"spent"`
-
-	ReviewImages []string `json:"review_images"`
-
-	Reviewer primitive.ObjectID `json:"user_id"`
 
 	Created_At primitive.DateTime `json:"created_at"`
 
@@ -89,11 +91,11 @@ func AddNewRestaurantReview(w http.ResponseWriter, r *http.Request) {
 
 	collection := client.Database(restaurantDB).Collection("REVIEWS")
 	var response = MongoJsonResponse{}
-	var request = UpdateRestaurantReviewRequest{}
+	var request = AddRestaurantReviewRequest{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	config.CheckErr(err)
 	log.Println("request: ", request)
-	if request.Name == "" || request.Review == "" || request.Rating == "" || request.Restaurant_ID == primitive.NilObjectID || request.Reviewer == primitive.NilObjectID {
+	if request.Review == "" || request.Restaurant_ID == primitive.NilObjectID || request.Reviewer == primitive.NilObjectID {
 		response.Type = "error"
 		response.Message = "name, review, rating, restaurant_id, user_id are required"
 		json.NewEncoder(w).Encode(response)
@@ -108,8 +110,49 @@ func AddNewRestaurantReview(w http.ResponseWriter, r *http.Request) {
 		config.CheckErr(err)
 		log.Println("insertResult: ", insertResult)
 		response.Type = "success"
-		response.SingleData = bson.M{insertResult.InsertedID.(primitive.ObjectID).Hex(): request}
+		// response.SingleData = bson.M{insertResult.InsertedID.(primitive.ObjectID).Hex(): request}
+		response.SingleData = bson.M{"InsertID": insertResult.InsertedID.(primitive.ObjectID).Hex()}
 		response.Message = "Review added"
+		json.NewEncoder(w).Encode(response)
+	}
+}
+
+/*
+Increment Like Count
+*/
+type UpdateLikeAndDislike struct {
+	ID         primitive.ObjectID `json:"id"`
+	Like       int                `json:"like"`
+	Dislike    int                `json:"dislike"`
+	Updated_At primitive.DateTime `json:"updated_at"`
+}
+
+func UpdateReviewLikeAndDislike(w http.ResponseWriter, r *http.Request) {
+	client := database.ConnectMongoDB()
+
+	defer client.Disconnect(context.TODO())
+
+	collection := client.Database(restaurantDB).Collection("REVIEWS")
+	var response = MongoJsonResponse{}
+	var request = UpdateLikeAndDislike{}
+	err := json.NewDecoder(r.Body).Decode(&request)
+	config.CheckErr(err)
+	log.Println("request: ", request)
+	if request.ID == primitive.NilObjectID {
+		response.Type = "error"
+		response.Message = "id is required"
+		json.NewEncoder(w).Encode(response)
+		return
+	} else {
+		id, err := primitive.ObjectIDFromHex(request.ID.Hex())
+		config.CheckErr(err)
+		request.Updated_At = config.GetCurrentTime()
+		updateResult, err := collection.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": bson.M{"like": request.Like, "dislike": request.Dislike, "updated_at": request.Updated_At}})
+		config.CheckErr(err)
+		log.Println("updateResult: ", updateResult)
+		response.Type = "success"
+		response.SingleData = bson.M{"UpdateID": updateResult}
+		response.Message = "Review updated"
 		json.NewEncoder(w).Encode(response)
 	}
 }

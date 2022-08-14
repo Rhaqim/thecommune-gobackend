@@ -32,3 +32,8 @@ func GetTime() time.Time {
 func GetCurrentTime() primitive.DateTime {
 	return primitive.NewDateTimeFromTime(GetTime())
 }
+
+// Validate Data from request body
+func ValidateData(data interface{}) bool {
+	return data != nil
+}
