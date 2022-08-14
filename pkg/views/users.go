@@ -63,8 +63,11 @@ func GetUserByID(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreatUser struct {
+	First_Name string             `json:"first_name"`
+	Last_Name  string             `json:"last_name"`
 	Username   string             `json:"username"`
 	Email      string             `json:"email"`
+	Phone      string             `json:"phone"`
 	Password   string             `json:"password"`
 	Created_At primitive.DateTime `json:"created_at"`
 	Updated_At primitive.DateTime `json:"updated_at"`
@@ -88,7 +91,16 @@ func CreatNewUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		user.Created_At = primitive.NewDateTimeFromTime(time.Now())
 		user.Updated_At = primitive.NewDateTimeFromTime(time.Now())
-		insertResult, err := collection.InsertOne(context.TODO(), user)
+		filter := bson.M{
+			"first_name": user.First_Name,
+			"last_name":  user.Last_Name,
+			"username":   user.Username,
+			"email":      user.Email,
+			"password":   user.Password,
+			"created_at": user.Created_At,
+			"updated_at": user.Updated_At,
+		}
+		insertResult, err := collection.InsertOne(context.TODO(), filter)
 		config.CheckErr(err)
 		log.Println("insertResult: ", insertResult)
 		response.Type = "success"
