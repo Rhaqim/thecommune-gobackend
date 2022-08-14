@@ -101,16 +101,30 @@ func AddNewRestaurantReview(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	} else {
-		id, err := primitive.ObjectIDFromHex(request.Restaurant_ID.Hex())
+		restaurant_id, err := primitive.ObjectIDFromHex(request.Restaurant_ID.Hex())
 		config.CheckErr(err)
-		request.Restaurant_ID = id
+
+		user_id, err := primitive.ObjectIDFromHex(request.Reviewer.Hex())
+		config.CheckErr(err)
+
 		request.Created_At = config.GetCurrentTime()
 		request.Updated_At = config.GetCurrentTime()
-		insertResult, err := collection.InsertOne(context.TODO(), request)
+		filter := bson.M{
+			"reviewer":      bson.M{"$ref": "USERS", "$id": user_id},
+			"review":        request.Review,
+			"rating":        request.Rating,
+			"spent":         request.Spent,
+			"review_images": request.Review_Images,
+			"restaurant_id": bson.M{"$ref": "RESTAURANTS", "$id": restaurant_id},
+			"dislike":       request.Dislike,
+			"like":          request.Like,
+			"created_at":    request.Created_At,
+			"updated_at":    request.Updated_At,
+		}
+		insertResult, err := collection.InsertOne(context.TODO(), filter)
 		config.CheckErr(err)
 		log.Println("insertResult: ", insertResult)
 		response.Type = "success"
-		// response.SingleData = bson.M{insertResult.InsertedID.(primitive.ObjectID).Hex(): request}
 		response.SingleData = bson.M{"InsertID": insertResult.InsertedID.(primitive.ObjectID).Hex()}
 		response.Message = "Review added"
 		json.NewEncoder(w).Encode(response)
