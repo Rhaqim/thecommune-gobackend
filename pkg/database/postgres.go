@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/Rhaqim/thecommune-gobackend/pkg/config"
+	_ "github.com/lib/pq"
 )
 
 func SetupDB() *sql.DB {

@@ -17,13 +17,13 @@ const (
 )
 
 type MongoJsonResponse struct {
-	Type    string   `json:"type"`
-	Data    []bson.M `json:"data"`
-	Message string   `json:"message"`
+	Type       string   `json:"type"`
+	Data       []bson.M `json:"data"`
+	SingleData bson.M   `json:"single_data"`
+	Message    string   `json:"message"`
 }
 
 type Restaurant struct {
-	ID           string `json:"id"`
 	Name         string `json:"name"`
 	Description  string `json:"description"`
 	Image        string `json:"image"`

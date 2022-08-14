@@ -38,6 +38,12 @@ func NewRouter() *mux.Router {
 			"/restaurant/reviews",
 			views.GetRestaurantReviews,
 		},
+		Route{
+			"UpdateRestaurantReview",
+			"POST",
+			"/restaurant/review",
+			views.AddNewRestaurantReview,
+		},
 	}
 
 	for _, route := range routes {
