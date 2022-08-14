@@ -12,6 +12,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type GetRestaurantReviewsType struct {
+	ID primitive.ObjectID `json:"restaurant_id"`
+}
+
 func GetRestaurantReviews(w http.ResponseWriter, r *http.Request) {
 	client := database.ConnectMongoDB()
 
@@ -20,21 +24,24 @@ func GetRestaurantReviews(w http.ResponseWriter, r *http.Request) {
 	collection := client.Database(restaurantDB).Collection("REVIEWS")
 
 	var restaurants bson.M
-
 	var restaurant []bson.M
+
 	var response = MongoJsonResponse{}
 
-	idFromQuery := r.FormValue("id")
-	log.Println("id: ", idFromQuery)
+	var request = GetRestaurantReviewsType{}
 
-	if idFromQuery == "" {
+	// idFromQuery := r.FormValue("id")
+	err := json.NewDecoder(r.Body).Decode(&request)
+	config.CheckErr(err)
+
+	if request.ID == primitive.NilObjectID {
 		response.Type = "error"
 		response.Message = "id is required"
 		json.NewEncoder(w).Encode(response)
 		return
 	} else {
 
-		id, err := primitive.ObjectIDFromHex(idFromQuery)
+		id, err := primitive.ObjectIDFromHex(request.ID.Hex())
 		config.CheckErr(err)
 
 		filter := bson.M{"restaurant_id": bson.M{"$ref": "RESTAURANTS", "$id": id}}
