@@ -96,6 +96,7 @@ func CreatNewUser(w http.ResponseWriter, r *http.Request) {
 			"last_name":  user.Last_Name,
 			"username":   user.Username,
 			"email":      user.Email,
+			"phone":      user.Phone,
 			"password":   user.Password,
 			"created_at": user.Created_At,
 			"updated_at": user.Updated_At,
