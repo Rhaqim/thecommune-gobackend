@@ -8,6 +8,7 @@ import (
 
 	"github.com/Rhaqim/thecommune-gobackend/pkg/config"
 	"github.com/Rhaqim/thecommune-gobackend/pkg/database"
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -16,7 +17,7 @@ type GetRestaurantReviewsType struct {
 	ID primitive.ObjectID `json:"restaurant_id"`
 }
 
-func GetRestaurantReviews(w http.ResponseWriter, r *http.Request) {
+func GetRestaurantReviews(c *gin.Context) {
 	client := database.ConnectMongoDB()
 
 	defer client.Disconnect(context.TODO())
@@ -26,18 +27,22 @@ func GetRestaurantReviews(w http.ResponseWriter, r *http.Request) {
 	var restaurants bson.M
 	var restaurant []bson.M
 
-	var response = MongoJsonResponse{}
+	var response MongoJsonResponse
 
 	var request = GetRestaurantReviewsType{}
 
 	// idFromQuery := r.FormValue("id")
-	err := json.NewDecoder(r.Body).Decode(&request)
-	config.CheckErr(err)
+	if err := c.BindJSON(&request); err != nil {
+		response.Type = "error"
+		response.Message = "id is required"
+		c.JSON(http.StatusBadRequest, gin.H{"res": response})
+		return
+	}
 
 	if request.ID == primitive.NilObjectID {
 		response.Type = "error"
 		response.Message = "id is required"
-		json.NewEncoder(w).Encode(response)
+		c.JSON(http.StatusBadRequest, response)
 		return
 	} else {
 
@@ -61,7 +66,7 @@ func GetRestaurantReviews(w http.ResponseWriter, r *http.Request) {
 		response.Data = restaurant
 		response.Message = "Restaurants found"
 
-		json.NewEncoder(w).Encode(response)
+		c.JSON(http.StatusOK, response)
 	}
 }
 
@@ -132,7 +137,7 @@ func AddNewRestaurantReview(w http.ResponseWriter, r *http.Request) {
 		config.CheckErr(err)
 		log.Println("insertResult: ", insertResult)
 		response.Type = "success"
-		response.SingleData = bson.M{"InsertID": insertResult.InsertedID.(primitive.ObjectID).Hex()}
+		response.Data = bson.M{"InsertID": insertResult.InsertedID.(primitive.ObjectID).Hex()}
 		response.Message = "Review added"
 		json.NewEncoder(w).Encode(response)
 	}
@@ -172,7 +177,7 @@ func UpdateReviewLikeAndDislike(w http.ResponseWriter, r *http.Request) {
 		config.CheckErr(err)
 		log.Println("updateResult: ", updateResult)
 		response.Type = "success"
-		response.SingleData = bson.M{"UpdateID": updateResult}
+		response.Data = bson.M{"UpdateID": updateResult}
 		response.Message = "Review updated"
 		json.NewEncoder(w).Encode(response)
 	}

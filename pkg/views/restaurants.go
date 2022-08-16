@@ -17,10 +17,9 @@ const (
 )
 
 type MongoJsonResponse struct {
-	Type       string   `json:"type"`
-	Data       []bson.M `json:"data"`
-	SingleData bson.M   `json:"single_data"`
-	Message    string   `json:"message"`
+	Type    string      `json:"type"`
+	Data    interface{} `json:"data"`
+	Message string      `json:"message"`
 }
 
 type Restaurant struct {
