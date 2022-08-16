@@ -13,6 +13,15 @@ type MongoJsonResponse struct {
 	Message string      `json:"message"`
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+// REVIEWS
+/*
+Get Restaurants Reviews
+*/
+type GetRestaurantReviewsType struct {
+	ID primitive.ObjectID `json:"restaurant_id"`
+}
+
 /*
 Add A New Restaurant Review
 */
@@ -47,6 +56,15 @@ type UpdateLikeAndDislike struct {
 	Like       int                `json:"like"`
 	Dislike    int                `json:"dislike"`
 	Updated_At primitive.DateTime `json:"updated_at"`
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+// USERS
+/*
+Get User by ID
+*/
+type GetUser struct {
+	ID primitive.ObjectID `json:"user_id"`
 }
 
 type Restaurant struct {
@@ -104,8 +122,4 @@ type RestaurantDeleteResponse struct {
 	Type    string     `json:"type"`
 	Data    Restaurant `json:"data"`
 	Message string     `json:"message"`
-}
-
-type GetRestaurantReviewsType struct {
-	ID primitive.ObjectID `json:"restaurant_id"`
 }

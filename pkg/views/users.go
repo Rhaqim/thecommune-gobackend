@@ -2,7 +2,6 @@ package views
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -14,10 +13,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type GetUser struct {
-	ID primitive.ObjectID `uri:"id" binding:"required"`
-}
-
+/*
+Get User by ID
+*/
 func GetUserByID(c *gin.Context) {
 	client := database.ConnectMongoDB()
 
@@ -25,17 +23,16 @@ func GetUserByID(c *gin.Context) {
 
 	collection := client.Database(restaurantCollection).Collection("USERS")
 
-	var users bson.M
-	var user []bson.M
+	var user bson.M
 	request := GetUser{}
 	var response = MongoJsonResponse{}
 
-	if err := c.BindUri(&request); err != nil {
-		response.Type = "error"
-		response.Message = "id is required"
-		c.JSON(http.StatusBadRequest, response)
+	if err := c.BindJSON(&request); err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	log.Print("Request ID sent by client:", request.ID)
 
 	if request.ID == primitive.NilObjectID {
 		response.Type = "error"
@@ -47,22 +44,13 @@ func GetUserByID(c *gin.Context) {
 		id, err := primitive.ObjectIDFromHex(request.ID.Hex())
 		config.CheckErr(err)
 
-		filter := bson.M{"_id": bson.M{"$ref": "USERS", "$id": id}}
-
-		cursor, err := collection.Find(context.TODO(), filter)
-
+		filter := bson.M{"_id": id}
+		err = collection.FindOne(context.TODO(), filter).Decode(&user)
 		config.CheckErr(err)
-		for cursor.Next(context.TODO()) {
-			err := cursor.Decode(&users)
-			config.CheckErr(err)
-
-			user = append(user, users)
-
-		}
 
 		response.Type = "success"
 		response.Data = user
-		response.Message = "Users found"
+		response.Message = "User found"
 
 		c.JSON(http.StatusOK, response)
 	}
@@ -79,7 +67,7 @@ type CreatUser struct {
 	Updated_At primitive.DateTime `json:"updated_at"`
 }
 
-func CreatNewUser(w http.ResponseWriter, r *http.Request) {
+func CreatNewUser(c *gin.Context) {
 	client := database.ConnectMongoDB()
 
 	defer client.Disconnect(context.TODO())
@@ -87,12 +75,16 @@ func CreatNewUser(w http.ResponseWriter, r *http.Request) {
 	collection := client.Database(restaurantCollection).Collection("USERS")
 	var user = CreatUser{}
 	var response = MongoJsonResponse{}
-	json.NewDecoder(r.Body).Decode(&user)
-	log.Println("user: ", user)
+	if err := c.BindJSON(&user); err != nil {
+		response.Type = "error"
+		response.Message = "first_name, last_name, username, email, phone, password are required"
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
 	if user.Username == "" || user.Email == "" || user.Password == "" {
 		response.Type = "error"
 		response.Message = "username, email and password are required"
-		json.NewEncoder(w).Encode(response)
+		c.JSON(http.StatusBadRequest, response)
 		return
 	} else {
 		user.Created_At = primitive.NewDateTimeFromTime(time.Now())
@@ -112,6 +104,6 @@ func CreatNewUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("insertResult: ", insertResult)
 		response.Type = "success"
 		response.Message = "User created"
-		json.NewEncoder(w).Encode(response)
+		c.JSON(http.StatusOK, response)
 	}
 }
