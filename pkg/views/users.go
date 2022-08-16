@@ -9,15 +9,16 @@ import (
 
 	"github.com/Rhaqim/thecommune-gobackend/pkg/config"
 	"github.com/Rhaqim/thecommune-gobackend/pkg/database"
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type GetUser struct {
-	ID string `json:"id"`
+	ID primitive.ObjectID `uri:"id" binding:"required"`
 }
 
-func GetUserByID(w http.ResponseWriter, r *http.Request) {
+func GetUserByID(c *gin.Context) {
 	client := database.ConnectMongoDB()
 
 	defer client.Disconnect(context.TODO())
@@ -26,19 +27,24 @@ func GetUserByID(w http.ResponseWriter, r *http.Request) {
 
 	var users bson.M
 	var user []bson.M
+	request := GetUser{}
 	var response = MongoJsonResponse{}
 
-	idFromQuery := r.FormValue("id")
-	log.Println("id: ", idFromQuery)
-
-	if idFromQuery == "" {
+	if err := c.BindUri(&request); err != nil {
 		response.Type = "error"
 		response.Message = "id is required"
-		json.NewEncoder(w).Encode(response)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	if request.ID == primitive.NilObjectID {
+		response.Type = "error"
+		response.Message = "id is required"
+		c.JSON(http.StatusBadRequest, response)
 		return
 	} else {
 
-		id, err := primitive.ObjectIDFromHex(idFromQuery)
+		id, err := primitive.ObjectIDFromHex(request.ID.Hex())
 		config.CheckErr(err)
 
 		filter := bson.M{"_id": bson.M{"$ref": "USERS", "$id": id}}
@@ -58,7 +64,7 @@ func GetUserByID(w http.ResponseWriter, r *http.Request) {
 		response.Data = user
 		response.Message = "Users found"
 
-		json.NewEncoder(w).Encode(response)
+		c.JSON(http.StatusOK, response)
 	}
 }
 
