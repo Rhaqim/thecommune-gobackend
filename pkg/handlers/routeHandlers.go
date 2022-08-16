@@ -12,6 +12,8 @@ func GinRouter() *gin.Engine {
 	restaurants := router.Group("/restaurants")
 	{
 		restaurants.GET("/reviews", views.GetRestaurantReviews)
+		restaurants.POST("/reviews", views.AddNewRestaurantReview)
+		restaurants.POST("/reviews/update", views.UpdateReviewLikeAndDislike)
 	}
 
 	// router.POST("/restaurant", views.GetRestaurantByName)

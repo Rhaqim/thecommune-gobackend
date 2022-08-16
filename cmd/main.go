@@ -11,6 +11,6 @@ func main() {
 
 	run := handlers.GinRouter()
 
-	run.Run(":8088")
+	run.Run(":8080")
 
 }
