@@ -44,9 +44,14 @@ func GetUserByID(c *gin.Context) {
 		id, err := primitive.ObjectIDFromHex(request.ID.Hex())
 		config.CheckErr(err)
 
+		log.Print("ID sent to mongoDB:", id)
+
 		filter := bson.M{"_id": id}
-		err = collection.FindOne(context.TODO(), filter).Decode(&user)
-		config.CheckErr(err)
+		if err := collection.FindOne(context.TODO(), filter).Decode(&user); err != nil {
+			log.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 
 		response.Type = "success"
 		response.Data = user
