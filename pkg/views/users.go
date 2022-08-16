@@ -21,7 +21,7 @@ func GetUserByID(c *gin.Context) {
 
 	defer client.Disconnect(context.TODO())
 
-	collection := client.Database(restaurantCollection).Collection("USERS")
+	collection := client.Database(restaurantDB).Collection("USERS")
 
 	var user bson.M
 	request := GetUser{}
@@ -34,31 +34,23 @@ func GetUserByID(c *gin.Context) {
 	}
 	log.Print("Request ID sent by client:", request.ID)
 
-	if request.ID == primitive.NilObjectID {
-		response.Type = "error"
-		response.Message = "id is required"
-		c.JSON(http.StatusBadRequest, response)
+	id, err := primitive.ObjectIDFromHex(request.ID.Hex())
+	config.CheckErr(err)
+
+	log.Print("ID sent to mongoDB:", id)
+
+	filter := bson.M{"_id": id}
+	if err := collection.FindOne(context.TODO(), filter).Decode(&user); err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
-	} else {
-
-		id, err := primitive.ObjectIDFromHex(request.ID.Hex())
-		config.CheckErr(err)
-
-		log.Print("ID sent to mongoDB:", id)
-
-		filter := bson.M{"_id": id}
-		if err := collection.FindOne(context.TODO(), filter).Decode(&user); err != nil {
-			log.Println(err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		response.Type = "success"
-		response.Data = user
-		response.Message = "User found"
-
-		c.JSON(http.StatusOK, response)
 	}
+
+	response.Type = "success"
+	response.Data = user
+	response.Message = "User found"
+
+	c.JSON(http.StatusOK, response)
 }
 
 type CreatUser struct {
@@ -77,7 +69,7 @@ func CreatNewUser(c *gin.Context) {
 
 	defer client.Disconnect(context.TODO())
 
-	collection := client.Database(restaurantCollection).Collection("USERS")
+	collection := client.Database(restaurantDB).Collection("USERS")
 	var user = CreatUser{}
 	var response = MongoJsonResponse{}
 	if err := c.BindJSON(&user); err != nil {
