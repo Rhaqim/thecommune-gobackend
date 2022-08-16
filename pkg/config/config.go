@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -36,4 +37,16 @@ func GetCurrentTime() primitive.DateTime {
 // Validate Data from request body
 func ValidateData(data interface{}) bool {
 	return data != nil
+}
+
+// Log Messages
+func Logs(level string, message string) {
+	switch level {
+	case "info":
+		log.Printf("INFO: %s --> %s", time.Now(), message)
+	case "error":
+		log.Printf("ERROR: %s --> %s", time.Now(), message)
+	default:
+		log.Printf("INFO: %s --> %s", time.Now(), message)
+	}
 }

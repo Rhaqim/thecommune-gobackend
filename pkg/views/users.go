@@ -28,7 +28,7 @@ func GetUserByID(c *gin.Context) {
 	var response = MongoJsonResponse{}
 
 	if err := c.BindJSON(&request); err != nil {
-		log.Println(err)
+		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -37,11 +37,11 @@ func GetUserByID(c *gin.Context) {
 	id, err := primitive.ObjectIDFromHex(request.ID.Hex())
 	config.CheckErr(err)
 
-	log.Print("ID sent to mongoDB:", id)
+	config.Logs("info", "ID: "+id.Hex())
 
 	filter := bson.M{"_id": id}
 	if err := collection.FindOne(context.TODO(), filter).Decode(&user); err != nil {
-		log.Println(err)
+		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -73,34 +73,33 @@ func CreatNewUser(c *gin.Context) {
 	var user = CreatUser{}
 	var response = MongoJsonResponse{}
 	if err := c.BindJSON(&user); err != nil {
+		config.Logs("error", err.Error())
 		response.Type = "error"
 		response.Message = "first_name, last_name, username, email, phone, password are required"
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-	if user.Username == "" || user.Email == "" || user.Password == "" {
-		response.Type = "error"
-		response.Message = "username, email and password are required"
-		c.JSON(http.StatusBadRequest, response)
-		return
-	} else {
-		user.Created_At = primitive.NewDateTimeFromTime(time.Now())
-		user.Updated_At = primitive.NewDateTimeFromTime(time.Now())
-		filter := bson.M{
-			"first_name": user.First_Name,
-			"last_name":  user.Last_Name,
-			"username":   user.Username,
-			"email":      user.Email,
-			"phone":      user.Phone,
-			"password":   user.Password,
-			"created_at": user.Created_At,
-			"updated_at": user.Updated_At,
-		}
-		insertResult, err := collection.InsertOne(context.TODO(), filter)
-		config.CheckErr(err)
-		log.Println("insertResult: ", insertResult)
-		response.Type = "success"
-		response.Message = "User created"
-		c.JSON(http.StatusOK, response)
+	config.Logs("info", "User: "+user.First_Name+" "+user.Last_Name+" "+user.Username+" "+user.Email)
+	user.Created_At = primitive.NewDateTimeFromTime(time.Now())
+	user.Updated_At = primitive.NewDateTimeFromTime(time.Now())
+	filter := bson.M{
+		"first_name": user.First_Name,
+		"last_name":  user.Last_Name,
+		"username":   user.Username,
+		"email":      user.Email,
+		"phone":      user.Phone,
+		"password":   user.Password,
+		"created_at": user.Created_At,
+		"updated_at": user.Updated_At,
 	}
+	insertResult, err := collection.InsertOne(context.TODO(), filter)
+	if err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	log.Println("insertResult: ", insertResult)
+	response.Type = "success"
+	response.Message = "User created"
+	c.JSON(http.StatusOK, response)
 }
