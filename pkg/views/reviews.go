@@ -13,10 +13,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type GetRestaurantReviewsType struct {
-	ID primitive.ObjectID `json:"restaurant_id"`
-}
-
+/*
+Get All Reviews for a Restaurant
+*/
 func GetRestaurantReviews(c *gin.Context) {
 	client := database.ConnectMongoDB()
 
