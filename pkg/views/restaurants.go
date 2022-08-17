@@ -22,9 +22,7 @@ func GetRestaurants(c *gin.Context) {
 
 	collection := client.Database(restaurantDB).Collection(restaurantCollection)
 
-	var restaurants bson.M
-
-	var restaurant []bson.M
+	var restaurants = []bson.M{}
 
 	var response = MongoJsonResponse{}
 
@@ -37,23 +35,14 @@ func GetRestaurants(c *gin.Context) {
 		return
 	}
 
-	for cursor.Next(context.TODO()) {
-		err := cursor.Decode(&restaurants)
-		if err != nil {
-			config.Logs("error", err.Error())
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		restaurant = append(restaurant, restaurants)
-
-		response.Type = "success"
-		response.Data = restaurant
-		response.Message = "Restaurants found"
+	if err := cursor.All(context.Background(), &restaurants); err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	response.Type = "success"
-	response.Data = restaurant
+	response.Data = restaurants
 	response.Message = "Restaurants found"
 
 	c.JSON(http.StatusOK, response)

@@ -27,20 +27,8 @@ func GinRouter() *gin.Engine {
 		users.GET("/getuser", views.GetUserByID)
 	}
 
-	// router.POST("/restaurant", views.GetRestaurantByName)
-	// router.GET("/restaurant/reviews", views.GetRestaurantReviews)
-	// router.POST("/restaurant/review", views.AddNewRestaurantReview)
-	// router.POST("/restaurant/review/like", views.UpdateReviewLikeAndDislike)
-
 	return router
 }
-
-// type Route struct {
-// 	Name        string
-// 	Method      string
-// 	Pattern     string
-// 	HandlerFunc http.HandlerFunc
-// }
 
 // type Routes []Route
 

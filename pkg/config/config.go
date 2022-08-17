@@ -40,7 +40,7 @@ func ValidateData(data interface{}) bool {
 }
 
 // Log Messages
-func Logs(level string, message string) {
+func Logs(level string, message interface{}) {
 	switch level {
 	case "info":
 		log.Printf("INFO: %s --> %s", time.Now(), message)
