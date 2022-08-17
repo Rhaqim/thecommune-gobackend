@@ -92,8 +92,8 @@ func AddNewRestaurantReview(c *gin.Context) {
 	user_id, err := primitive.ObjectIDFromHex(request.Reviewer.Hex())
 	config.CheckErr(err)
 
-	request.Created_At = config.GetCurrentTime()
-	request.Updated_At = config.GetCurrentTime()
+	request.CreatedAt = config.GetCurrentTime()
+	request.UpdatedAt = config.GetCurrentTime()
 	filter := bson.M{
 		"reviewer":      bson.M{"$ref": "USERS", "$id": user_id},
 		"review":        request.Review,
@@ -103,8 +103,8 @@ func AddNewRestaurantReview(c *gin.Context) {
 		"restaurant_id": bson.M{"$ref": "RESTAURANTS", "$id": restaurant_id},
 		"dislike":       request.Dislike,
 		"like":          request.Like,
-		"created_at":    request.Created_At,
-		"updated_at":    request.Updated_At,
+		"created_at":    request.CreatedAt,
+		"updated_at":    request.UpdatedAt,
 	}
 	insertResult, err := collection.InsertOne(context.TODO(), filter)
 	if err != nil {
@@ -141,8 +141,8 @@ func UpdateReviewLikeAndDislike(c *gin.Context) {
 	log.Println("request: ", request)
 	id, err := primitive.ObjectIDFromHex(request.ID.Hex())
 	config.CheckErr(err)
-	request.Updated_At = config.GetCurrentTime()
-	updateResult, err := collection.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": bson.M{"like": request.Like, "dislike": request.Dislike, "updated_at": request.Updated_At}})
+	request.UpdatedAt = config.GetCurrentTime()
+	updateResult, err := collection.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": bson.M{"like": request.Like, "dislike": request.Dislike, "updated_at": request.UpdatedAt}})
 	if err != nil {
 		response.Type = "error"
 		response.Message = "Error updating review like and dislike"

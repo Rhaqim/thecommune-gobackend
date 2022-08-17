@@ -2,19 +2,19 @@ package views
 
 import (
 	"context"
-	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/Rhaqim/thecommune-gobackend/pkg/config"
 	"github.com/Rhaqim/thecommune-gobackend/pkg/database"
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 /*
 Get All Restaurants
 */
-func Restaurants(w http.ResponseWriter, r *http.Request) {
+func GetRestaurants(c *gin.Context) {
 
 	client := database.ConnectMongoDB()
 
@@ -31,11 +31,19 @@ func Restaurants(w http.ResponseWriter, r *http.Request) {
 	filter := bson.M{}
 
 	cursor, err := collection.Find(context.TODO(), filter)
-	config.CheckErr(err)
+	if err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	for cursor.Next(context.TODO()) {
 		err := cursor.Decode(&restaurants)
-		config.CheckErr(err)
+		if err != nil {
+			config.Logs("error", err.Error())
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 
 		restaurant = append(restaurant, restaurants)
 
@@ -48,10 +56,10 @@ func Restaurants(w http.ResponseWriter, r *http.Request) {
 	response.Data = restaurant
 	response.Message = "Restaurants found"
 
-	json.NewEncoder(w).Encode(response)
+	c.JSON(http.StatusOK, response)
 }
 
-func GetRestaurantByName(w http.ResponseWriter, r *http.Request) {
+func GetRestaurantByName(c *gin.Context) {
 	client := database.ConnectMongoDB()
 
 	defer client.Disconnect(context.TODO())
@@ -67,7 +75,11 @@ func GetRestaurantByName(w http.ResponseWriter, r *http.Request) {
 	filter := bson.M{"name": "Shiro Lagos"}
 
 	err := collection.FindOne(context.TODO(), filter).Decode(&restaurants)
-	config.CheckErr(err)
+	if err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	restaurant = append(restaurant, restaurants)
 
@@ -75,32 +87,60 @@ func GetRestaurantByName(w http.ResponseWriter, r *http.Request) {
 	response.Data = restaurant
 	response.Message = "Restaurants found"
 
-	json.NewEncoder(w).Encode(response)
+	c.JSON(http.StatusOK, response)
 }
 
-func CreateRestaurant(w http.ResponseWriter, r *http.Request) {
+func CreateRestaurant(c *gin.Context) {
 	client := database.ConnectMongoDB()
 
 	defer client.Disconnect(context.TODO())
 
 	collection := client.Database(restaurantDB).Collection(restaurantCollection)
 
-	var restaurants bson.M
+	request := CreateRestaurants{}
 
-	var restaurant []bson.M
+	response := MongoJsonResponse{}
 
-	var response = MongoJsonResponse{}
+	err := c.BindJSON(&request)
+	if err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-	InsertResult, err := collection.InsertOne(context.TODO(), restaurants)
+	request.CreatedAt = config.GetCurrentTime()
+	request.UpdatedAt = config.GetCurrentTime()
 
-	config.CheckErr(err)
+	filter := bson.M{
+		"name":        request.Name,
+		"description": request.Description,
+		"address":     request.Address,
+		"phone":       request.Phone,
+		"email":       request.Email,
+		"website":     request.Website,
+		"image":       request.Image,
+		"latitude":    request.Lat,
+		"longitude":   request.Long,
+		"rating":      request.Rating,
+		"openingTime": request.OpeningTime,
+		"price":       request.Price,
+		"categories":  request.Categories,
+		"tags":        request.Tags,
+		"createdAt":   request.CreatedAt,
+		"updatedAt":   request.UpdatedAt,
+	}
 
-	log.Printf("Inserted a single document: %v", InsertResult.InsertedID)
+	insertResult, err := collection.InsertOne(context.TODO(), filter)
+	if err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	response.Type = "success"
-	response.Data = restaurant
-	response.Message = "Restaurants found"
+	response.Data = bson.M{"InsertID": insertResult.InsertedID.(primitive.ObjectID).Hex()}
+	response.Message = "Restaurant created"
 
-	json.NewEncoder(w).Encode(response)
+	c.JSON(http.StatusOK, response)
 
 }
