@@ -68,9 +68,10 @@ type GetUser struct {
 }
 
 type CreateRestaurants struct {
-	Name        string             `json:"name"`
+	Title       string             `json:"name"`
 	Description string             `json:"description"`
-	Image       []string           `json:"image"`
+	Slug        string             `json:"slug"`
+	Images      []string           `json:"images"`
 	Address     string             `json:"address"`
 	Phone       string             `json:"phone"`
 	Email       string             `json:"email"`
@@ -79,6 +80,7 @@ type CreateRestaurants struct {
 	Long        string             `json:"lng"`
 	Rating      string             `json:"rating"`
 	OpeningTime interface{}        `json:"opening_hours"`
+	Currency    string             `json:"currency"`
 	Price       float64            `json:"price"`
 	Categories  []string           `json:"categories"`
 	Tags        []string           `json:"tags"`

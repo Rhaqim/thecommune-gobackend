@@ -116,18 +116,20 @@ func CreateRestaurant(c *gin.Context) {
 	request.UpdatedAt = config.GetCurrentTime()
 
 	filter := bson.M{
-		"name":        request.Name,
+		"name":        request.Title,
 		"description": request.Description,
+		"slug":        request.Slug,
 		"address":     request.Address,
 		"phone":       request.Phone,
 		"email":       request.Email,
 		"website":     request.Website,
-		"image":       request.Image,
+		"images":      request.Images,
 		"latitude":    request.Lat,
 		"longitude":   request.Long,
 		"rating":      request.Rating,
 		"openingTime": request.OpeningTime,
-		"price":       request.Price,
+		"currency":    request.Currency,
+		"avgPrice":    request.Price,
 		"categories":  request.Categories,
 		"tags":        request.Tags,
 		"createdAt":   request.CreatedAt,
