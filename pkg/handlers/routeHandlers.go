@@ -19,6 +19,7 @@ func GinRouter() *gin.Engine {
 
 		}
 		restaurants.GET("", views.GetRestaurants)
+		restaurants.GET("/id", views.GetRestaurantByID)
 		restaurants.POST("", views.CreateRestaurant)
 	}
 

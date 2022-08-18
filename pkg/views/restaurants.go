@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 /*
@@ -28,7 +29,9 @@ func GetRestaurants(c *gin.Context) {
 
 	filter := bson.M{}
 
-	cursor, err := collection.Find(context.TODO(), filter)
+	opts := options.Find().SetProjection(bson.M{"name": 1, "description": 1, "address": 1, "image": 1, "rating": 1})
+
+	cursor, err := collection.Find(context.TODO(), filter, opts)
 	if err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -48,29 +51,41 @@ func GetRestaurants(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func GetRestaurantByName(c *gin.Context) {
+func GetRestaurantByID(c *gin.Context) {
 	client := database.ConnectMongoDB()
 
 	defer client.Disconnect(context.TODO())
 
 	collection := client.Database(restaurantDB).Collection(restaurantCollection)
 
-	var restaurants bson.M
+	var restaurant bson.M
 
-	var restaurant []bson.M
+	var request = GetRestaurantReviewsType{}
 
 	var response = MongoJsonResponse{}
 
-	filter := bson.M{"name": "Shiro Lagos"}
+	if err := c.BindJSON(&request); err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-	err := collection.FindOne(context.TODO(), filter).Decode(&restaurants)
+	id, err := primitive.ObjectIDFromHex(request.ID.Hex())
+
 	if err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	restaurant = append(restaurant, restaurants)
+	filter := bson.M{"_id": id}
+
+	err = collection.FindOne(context.TODO(), filter).Decode(&restaurant)
+	if err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	response.Type = "success"
 	response.Data = restaurant
