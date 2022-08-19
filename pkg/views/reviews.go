@@ -93,14 +93,14 @@ func AddNewRestaurantReview(c *gin.Context) {
 	filter := bson.M{
 		"reviewer":      bson.M{"$ref": "USERS", "$id": user_id},
 		"review":        request.Review,
-		"rating":        request.Rating,
+		"reviewRating":  request.Rating,
 		"spent":         request.Spent,
-		"review_images": request.Review_Images,
+		"reviewImages":  request.Review_Images,
 		"restaurant_id": bson.M{"$ref": "RESTAURANTS", "$id": restaurant_id},
 		"dislike":       request.Dislike,
 		"like":          request.Like,
-		"created_at":    request.CreatedAt,
-		"updated_at":    request.UpdatedAt,
+		"createdAt":     request.CreatedAt,
+		"updatedAt":     request.UpdatedAt,
 	}
 	insertResult, err := collection.InsertOne(context.TODO(), filter)
 	if err != nil {
