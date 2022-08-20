@@ -68,7 +68,7 @@ type GetUser struct {
 }
 
 type CreateRestaurants struct {
-	Title       string             `json:"name"`
+	Title       string             `json:"title"`
 	Description string             `json:"description"`
 	Slug        string             `json:"slug"`
 	Images      []interface{}      `json:"images"`
@@ -79,13 +79,18 @@ type CreateRestaurants struct {
 	Lat         string             `json:"lat"`
 	Long        string             `json:"lng"`
 	Rating      int                `json:"rating"`
-	OpeningTime interface{}        `json:"opening_hours"`
+	OpeningTime []interface{}      `json:"openingTime"`
 	Currency    string             `json:"currency"`
 	Price       float64            `json:"price"`
 	Categories  []string           `json:"categories"`
 	Tags        []string           `json:"tags"`
-	CreatedAt   primitive.DateTime `json:"created_at"`
-	UpdatedAt   primitive.DateTime `json:"updated_at"`
+	CreatedAt   primitive.DateTime `json:"createdAt"`
+	UpdatedAt   primitive.DateTime `json:"updatedAt"`
+}
+
+type UpdateRestaurantAvgPriceType struct {
+	ID    primitive.ObjectID `json:"id"`
+	Price float64            `json:"price"`
 }
 
 type RestaurantDeleteRequest struct {

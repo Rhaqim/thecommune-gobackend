@@ -150,3 +150,51 @@ func CreateRestaurant(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 
 }
+
+func UpdateRestaurantAvgPrice(c *gin.Context) {
+	client := database.ConnectMongoDB()
+
+	defer client.Disconnect(context.TODO())
+
+	collection := client.Database(restaurantDB).Collection(restaurantCollection)
+
+	request := UpdateRestaurantAvgPriceType{}
+
+	response := MongoJsonResponse{}
+
+	err := c.BindJSON(&request)
+	if err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	id, err := primitive.ObjectIDFromHex(request.ID.Hex())
+
+	if err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	filter := bson.M{"_id": id}
+
+	update := bson.M{
+		"$set": bson.M{
+			"avgPrice": request.Price,
+		},
+	}
+
+	_, err = collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	response.Type = "success"
+	response.Data = bson.M{"ID": request.ID.Hex()}
+	response.Message = "Restaurant updated"
+
+	c.JSON(http.StatusOK, response)
+}
