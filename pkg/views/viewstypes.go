@@ -71,14 +71,14 @@ type CreateRestaurants struct {
 	Title       string             `json:"name"`
 	Description string             `json:"description"`
 	Slug        string             `json:"slug"`
-	Images      []string           `json:"images"`
+	Images      []interface{}      `json:"images"`
 	Address     string             `json:"address"`
 	Phone       string             `json:"phone"`
 	Email       string             `json:"email"`
 	Website     string             `json:"website"`
 	Lat         string             `json:"lat"`
 	Long        string             `json:"lng"`
-	Rating      string             `json:"rating"`
+	Rating      int                `json:"rating"`
 	OpeningTime interface{}        `json:"opening_hours"`
 	Currency    string             `json:"currency"`
 	Price       float64            `json:"price"`

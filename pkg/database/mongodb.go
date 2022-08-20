@@ -20,8 +20,6 @@ func ConnectMongoDB() *mongo.Client {
 		log.Fatal("MONGO_URI is not set")
 	}
 
-	uri = "mongodb://docker:mongopw@localhost:49154"
-
 	log.Println("Connecting to MongoDB: ", uri)
 
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))

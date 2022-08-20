@@ -29,7 +29,7 @@ func GetRestaurants(c *gin.Context) {
 
 	filter := bson.M{}
 
-	opts := options.Find().SetProjection(bson.M{"name": 1, "description": 1, "address": 1, "image": 1, "rating": 1})
+	opts := options.Find().SetProjection(bson.M{"title": 1, "description": 1, "address": 1, "images": 1, "rating": 1, "slug": 1})
 
 	cursor, err := collection.Find(context.TODO(), filter, opts)
 	if err != nil {
