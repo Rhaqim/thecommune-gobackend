@@ -31,11 +31,11 @@ type AddRestaurantReviewRequest struct {
 
 	Review string `json:"review"`
 
-	Rating int `json:"rating"`
+	Rating int `json:"reviewRating"`
 
-	Spent int `json:"spent"`
+	Spent float64 `json:"spent"`
 
-	Review_Images []string `json:"review_images"`
+	ReviewImages []interface{} `json:"reviewImages"`
 
 	Restaurant_ID primitive.ObjectID `json:"restaurant_id"`
 
@@ -43,9 +43,9 @@ type AddRestaurantReviewRequest struct {
 
 	Like int `json:"like"`
 
-	CreatedAt primitive.DateTime `json:"created_at"`
+	CreatedAt primitive.DateTime `json:"createdAt"`
 
-	UpdatedAt primitive.DateTime `json:"updated_at"`
+	UpdatedAt primitive.DateTime `json:"updatedAt"`
 }
 
 /*
@@ -55,7 +55,7 @@ type UpdateLikeAndDislike struct {
 	ID        primitive.ObjectID `json:"id"`
 	Like      int                `json:"like"`
 	Dislike   int                `json:"dislike"`
-	UpdatedAt primitive.DateTime `json:"updated_at"`
+	UpdatedAt primitive.DateTime `json:"updatedAt"`
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -89,8 +89,9 @@ type CreateRestaurants struct {
 }
 
 type UpdateRestaurantAvgPriceType struct {
-	ID    primitive.ObjectID `json:"id"`
-	Price float64            `json:"price"`
+	ID        primitive.ObjectID `json:"id"`
+	Price     float64            `json:"price"`
+	UpdatedAt primitive.DateTime `json:"updatedAt"`
 }
 
 type RestaurantDeleteRequest struct {

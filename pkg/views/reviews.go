@@ -95,7 +95,7 @@ func AddNewRestaurantReview(c *gin.Context) {
 		"review":        request.Review,
 		"reviewRating":  request.Rating,
 		"spent":         request.Spent,
-		"reviewImages":  request.Review_Images,
+		"reviewImages":  request.ReviewImages,
 		"restaurant_id": bson.M{"$ref": "RESTAURANTS", "$id": restaurant_id},
 		"dislike":       request.Dislike,
 		"like":          request.Like,
@@ -138,7 +138,7 @@ func UpdateReviewLikeAndDislike(c *gin.Context) {
 	id, err := primitive.ObjectIDFromHex(request.ID.Hex())
 	config.CheckErr(err)
 	request.UpdatedAt = config.GetCurrentTime()
-	updateResult, err := collection.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": bson.M{"like": request.Like, "dislike": request.Dislike, "updated_at": request.UpdatedAt}})
+	updateResult, err := collection.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": bson.M{"like": request.Like, "dislike": request.Dislike, "updatedAt": request.UpdatedAt}})
 	if err != nil {
 		response.Type = "error"
 		response.Message = "Error updating review like and dislike"

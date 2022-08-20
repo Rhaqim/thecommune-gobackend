@@ -177,11 +177,14 @@ func UpdateRestaurantAvgPrice(c *gin.Context) {
 		return
 	}
 
+	request.UpdatedAt = config.GetCurrentTime()
+
 	filter := bson.M{"_id": id}
 
 	update := bson.M{
 		"$set": bson.M{
-			"avgPrice": request.Price,
+			"avgPrice":  request.Price,
+			"updatedAt": request.UpdatedAt,
 		},
 	}
 
