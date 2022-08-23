@@ -53,17 +53,6 @@ func GetUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-type CreatUser struct {
-	First_Name string             `json:"first_name"`
-	Last_Name  string             `json:"last_name"`
-	Username   string             `json:"username"`
-	Email      string             `json:"email"`
-	Phone      string             `json:"phone"`
-	Password   string             `json:"password"`
-	Created_At primitive.DateTime `json:"created_at"`
-	Updated_At primitive.DateTime `json:"updated_at"`
-}
-
 func CreatNewUser(c *gin.Context) {
 	client := database.ConnectMongoDB()
 
@@ -75,20 +64,21 @@ func CreatNewUser(c *gin.Context) {
 	if err := c.BindJSON(&user); err != nil {
 		config.Logs("error", err.Error())
 		response.Type = "error"
-		response.Message = "first_name, last_name, username, email, phone, password are required"
+		response.Message = "fullname, username, email, phone, password are required"
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-	config.Logs("info", "User: "+user.First_Name+" "+user.Last_Name+" "+user.Username+" "+user.Email)
+	config.Logs("info", "User: "+user.Fullname+" "+user.Username+" "+user.Email)
 	user.Created_At = primitive.NewDateTimeFromTime(time.Now())
 	user.Updated_At = primitive.NewDateTimeFromTime(time.Now())
 	filter := bson.M{
-		"first_name": user.First_Name,
-		"last_name":  user.Last_Name,
+		"fullname":   user.Fullname,
 		"username":   user.Username,
+		"avatar":     user.Avatar,
 		"email":      user.Email,
-		"phone":      user.Phone,
 		"password":   user.Password,
+		"social":     user.Social,
+		"role":       user.Role,
 		"created_at": user.Created_At,
 		"updated_at": user.Updated_At,
 	}

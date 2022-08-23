@@ -67,6 +67,18 @@ type GetUser struct {
 	ID primitive.ObjectID `json:"user_id"`
 }
 
+type CreatUser struct {
+	Fullname   string             `json:"fullname"`
+	Username   string             `json:"username"`
+	Avatar     []interface{}      `json:"avatar"`
+	Email      string             `json:"email"`
+	Password   string             `json:"password"`
+	Social     []interface{}      `json:"social"`
+	Role       string             `json:"role"`
+	Created_At primitive.DateTime `json:"created_at"`
+	Updated_At primitive.DateTime `json:"updated_at"`
+}
+
 type CreateRestaurants struct {
 	Title       string             `json:"title"`
 	Description string             `json:"description"`
