@@ -8,6 +8,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"log"
+	"testing"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -22,12 +23,12 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func TestPassword(password string) (string, error) {
+func encoding(password string) (string, error) {
 	bytes := sha256.Sum256([]byte(password))
 	return hex.EncodeToString(bytes[:]), nil
 }
 
-func main() {
+func TestPassword(t *testing.T) {
 	password := "password"
 	hash, err := HashPassword(password)
 	if err != nil {
@@ -35,11 +36,4 @@ func main() {
 	}
 	log.Println(hash)
 	log.Println(CheckPasswordHash(password, hash))
-
-	hash, err = TestPassword(password)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println(hash)
-
 }
