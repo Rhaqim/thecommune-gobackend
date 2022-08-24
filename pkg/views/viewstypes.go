@@ -3,7 +3,9 @@ package views
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 const (
-	restaurantCollection = "the_commune_test"
+	restaurantCollection = "RESTAURANTS"
+	reviewCollection     = "REVIEWS"
+	usersCollection      = "USERS"
 	restaurantDB         = "lagos_restaurants"
 )
 

@@ -30,3 +30,7 @@ func ConnectMongoDB() *mongo.Client {
 
 	return client
 }
+
+func OpenCollection(client *mongo.Client, database string, collection string) *mongo.Collection {
+	return client.Database(database).Collection(collection)
+}
