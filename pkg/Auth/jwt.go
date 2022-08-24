@@ -92,12 +92,12 @@ func UpdateToken(signedToken string, signedRefreshToken string, email string, us
 
 	upsert := true
 
-	filter := bson.D{{"email", email}}
+	filter := bson.M{"email": email}
 	opts := options.UpdateOptions{
 		Upsert: &upsert,
 	}
 
-	_, err = collection.UpdateOne(ctx, filter, bson.D{{"$set", updateObj}}, &opts)
+	_, err = collection.UpdateOne(ctx, filter, bson.D{{Key: "$set", Value: updateObj}}, &opts)
 	if err != nil {
 		log.Fatal(err)
 		return
