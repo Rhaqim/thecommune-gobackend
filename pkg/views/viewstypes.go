@@ -61,17 +61,26 @@ type GetUser struct {
 }
 
 type CreatUser struct {
-	Fullname   string             `json:"fullname"`
-	Username   string             `json:"username"`
-	Avatar     []interface{}      `json:"avatar"`
-	Email      string             `json:"email"`
-	Password   string             `json:"password"`
-	Social     []interface{}      `json:"social"`
-	Role       string             `json:"role"`
-	Created_At primitive.DateTime `json:"created_at"`
-	Updated_At primitive.DateTime `json:"updated_at"`
+	Fullname  string             `json:"fullname"`
+	Username  string             `json:"username"`
+	Avatar    []interface{}      `json:"avatar"`
+	Email     string             `json:"email"`
+	Password  string             `json:"password"`
+	Social    []interface{}      `json:"social"`
+	Role      string             `json:"role"`
+	CreatedAt primitive.DateTime `json:"createdAt"`
+	UpdatedAt primitive.DateTime `json:"updatedAt"`
 }
 
+type UpdateUserAvatar struct {
+	ID        primitive.ObjectID `json:"id"`
+	Avatar    []interface{}      `json:"avatar"`
+	UpdatedAt primitive.DateTime `json:"updated_at"`
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+// RESTAURANTS
+/* Create Restaurant */
 type CreateRestaurants struct {
 	Title       string             `json:"title"`
 	Description string             `json:"description"`

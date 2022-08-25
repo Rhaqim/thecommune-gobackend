@@ -19,11 +19,6 @@ Get User by ID
 var usersCollection = database.OpenCollection(database.ConnectMongoDB(), DB, USERS)
 
 func GetUserByID(c *gin.Context) {
-	// client := database.ConnectMongoDB()
-
-	// defer client.Disconnect(context.TODO())
-
-	// collection := client.Database(restaurantDB).Collection("USERS")
 
 	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
@@ -58,11 +53,6 @@ func GetUserByID(c *gin.Context) {
 }
 
 func CreatNewUser(c *gin.Context) {
-	// client := database.ConnectMongoDB()
-
-	// defer client.Disconnect(context.TODO())
-
-	// collection := client.Database(restaurantDB).Collection("USERS")
 	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	var user = CreatUser{}
@@ -75,18 +65,18 @@ func CreatNewUser(c *gin.Context) {
 		return
 	}
 	config.Logs("info", "User: "+user.Fullname+" "+user.Username+" "+user.Email)
-	user.Created_At = primitive.NewDateTimeFromTime(time.Now())
-	user.Updated_At = primitive.NewDateTimeFromTime(time.Now())
+	user.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
+	user.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
 	filter := bson.M{
-		"fullname":   user.Fullname,
-		"username":   user.Username,
-		"avatar":     user.Avatar,
-		"email":      user.Email,
-		"password":   user.Password,
-		"social":     user.Social,
-		"role":       user.Role,
-		"created_at": user.Created_At,
-		"updated_at": user.Updated_At,
+		"fullname":  user.Fullname,
+		"username":  user.Username,
+		"avatar":    user.Avatar,
+		"email":     user.Email,
+		"password":  user.Password,
+		"social":    user.Social,
+		"role":      user.Role,
+		"createdAt": user.CreatedAt,
+		"updatedAt": user.UpdatedAt,
 	}
 	insertResult, err := usersCollection.InsertOne(context.TODO(), filter)
 	if err != nil {
@@ -98,4 +88,46 @@ func CreatNewUser(c *gin.Context) {
 	response.Type = "success"
 	response.Message = "User created"
 	c.JSON(http.StatusOK, response)
+}
+
+func UpdateAvatar(c *gin.Context) {
+	defer database.ConnectMongoDB().Disconnect(context.TODO())
+
+	request := UpdateUserAvatar{}
+	response := MongoJsonResponse{}
+
+	if err := c.BindJSON(&request); err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	log.Print("Request ID sent by client:", request.ID)
+
+	id, err := primitive.ObjectIDFromHex(request.ID.Hex())
+	config.CheckErr(err)
+
+	config.Logs("info", "ID: "+id.Hex())
+
+	request.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
+
+	filter := bson.M{"_id": id}
+
+	update := bson.M{
+		"$set": bson.M{
+			"avatar":    request.Avatar,
+			"updatedAt": request.UpdatedAt,
+		},
+	}
+
+	updateResult, err := usersCollection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	log.Println("updateResult: ", updateResult)
+	response.Type = "success"
+	response.Message = "User updated"
+	c.JSON(http.StatusOK, response)
+
 }
