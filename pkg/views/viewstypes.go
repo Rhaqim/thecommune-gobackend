@@ -29,25 +29,16 @@ Add A New Restaurant Review
 */
 
 type AddRestaurantReviewRequest struct {
-	Reviewer primitive.ObjectID `json:"reviewer"`
-
-	Review string `json:"review"`
-
-	Rating int `json:"reviewRating"`
-
-	Spent float64 `json:"spent"`
-
-	ReviewImages []interface{} `json:"reviewImages"`
-
+	Reviewer      primitive.ObjectID `json:"reviewer"`
+	Review        string             `json:"review"`
+	Rating        int                `json:"reviewRating"`
+	Spent         float64            `json:"spent"`
+	ReviewImages  []interface{}      `json:"reviewImages"`
 	Restaurant_ID primitive.ObjectID `json:"restaurant_id"`
-
-	Dislike int `json:"dislike"`
-
-	Like int `json:"like"`
-
-	CreatedAt primitive.DateTime `json:"createdAt"`
-
-	UpdatedAt primitive.DateTime `json:"updatedAt"`
+	Dislike       int                `json:"dislike"`
+	Like          int                `json:"like"`
+	CreatedAt     primitive.DateTime `json:"createdAt"`
+	UpdatedAt     primitive.DateTime `json:"updatedAt"`
 }
 
 /*
@@ -90,8 +81,6 @@ type CreateRestaurants struct {
 	Phone       string             `json:"phone"`
 	Email       string             `json:"email"`
 	Website     string             `json:"website"`
-	Lat         string             `json:"lat"`
-	Long        string             `json:"lng"`
 	Rating      int                `json:"rating"`
 	OpeningTime []interface{}      `json:"openingTime"`
 	Currency    string             `json:"currency"`

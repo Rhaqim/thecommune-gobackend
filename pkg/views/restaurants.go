@@ -121,8 +121,6 @@ func CreateRestaurant(c *gin.Context) {
 		"email":       request.Email,
 		"website":     request.Website,
 		"images":      request.Images,
-		"latitude":    request.Lat,
-		"longitude":   request.Long,
 		"rating":      request.Rating,
 		"openingTime": request.OpeningTime,
 		"currency":    request.Currency,

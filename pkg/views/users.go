@@ -16,7 +16,7 @@ import (
 /*
 Get User by ID
 */
-var usersCollection = database.OpenCollection(database.ConnectMongoDB(), "lagos_restaurants", "USERS")
+var usersCollection = database.OpenCollection(database.ConnectMongoDB(), DB, USERS)
 
 func GetUserByID(c *gin.Context) {
 	// client := database.ConnectMongoDB()
