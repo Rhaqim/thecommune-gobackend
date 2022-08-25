@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Rhaqim/thecommune-gobackend/pkg/auth"
 	"github.com/Rhaqim/thecommune-gobackend/pkg/config"
 	"github.com/Rhaqim/thecommune-gobackend/pkg/database"
 	"github.com/gin-gonic/gin"
@@ -70,12 +71,14 @@ func CreatNewUser(c *gin.Context) {
 	config.Logs("info", "User: "+user.Fullname+" "+user.Username+" "+user.Email)
 	user.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
 	user.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
+	password, err := auth.HashAndSalt(user.Password)
+	config.CheckErr(err)
 	filter := bson.M{
 		"fullname":  user.Fullname,
 		"username":  user.Username,
 		"avatar":    user.Avatar,
 		"email":     user.Email,
-		"password":  user.Password,
+		"password":  password,
 		"social":    user.Social,
 		"role":      user.Role,
 		"createdAt": user.CreatedAt,
@@ -136,4 +139,37 @@ func UpdateAvatar(c *gin.Context) {
 	response.Message = "User updated"
 	c.JSON(http.StatusOK, response)
 
+}
+
+func SiginIn(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	defer database.ConnectMongoDB().Disconnect(context.TODO())
+
+	var user = SignInStruct{}
+	var response = MongoJsonResponse{}
+
+	if err := c.BindJSON(&user); err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	log.Print("Request ID sent by client:", user.Username)
+
+	filter := bson.M{"username": user.Username}
+	if err := usersCollection.FindOne(ctx, filter).Decode(&user); err != nil {
+		config.Logs("error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	log.Print("User: ", user)
+	if auth.CheckPasswordHash(user.Password, user.Password) {
+		response.Type = "success"
+		response.Message = "User found"
+		response.Data = user
+	} else {
+		response.Type = "error"
+		response.Message = "User not found"
+	}
+	c.JSON(http.StatusOK, response)
 }

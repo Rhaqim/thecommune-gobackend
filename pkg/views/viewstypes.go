@@ -78,6 +78,11 @@ type UpdateUserAvatar struct {
 	UpdatedAt primitive.DateTime `json:"updated_at"`
 }
 
+type SignInStruct struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////
 // RESTAURANTS
 /* Create Restaurant */
