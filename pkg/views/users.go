@@ -60,7 +60,7 @@ func CreatNewUser(c *gin.Context) {
 	if err := c.BindJSON(&user); err != nil {
 		config.Logs("error", err.Error())
 		response.Type = "error"
-		response.Message = "fullname, username, email, phone, password are required"
+		response.Message = "fullname, username, email, password are required"
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}

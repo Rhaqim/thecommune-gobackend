@@ -27,6 +27,8 @@ func GinRouter() *gin.Engine {
 	users := router.Group("/users")
 	{
 		users.GET("/getuser", views.GetUserByID)
+		users.POST("/createuser", views.CreatNewUser)
+		users.POST("/updateavatar", views.UpdateAvatar)
 	}
 
 	return router
