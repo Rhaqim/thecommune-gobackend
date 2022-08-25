@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/Rhaqim/thecommune-gobackend/pkg/config"
 	"github.com/Rhaqim/thecommune-gobackend/pkg/database"
@@ -19,6 +20,8 @@ Get All Reviews for a Restaurant
 var reviewsCollection = database.OpenCollection(database.ConnectMongoDB(), DB, REVIEWS)
 
 func GetRestaurantReviews(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	var restaurants []bson.M
@@ -40,7 +43,7 @@ func GetRestaurantReviews(c *gin.Context) {
 
 	filter := bson.M{"restaurant_id": bson.M{"$ref": "RESTAURANTS", "$id": id}}
 
-	cursor, err := reviewsCollection.Find(context.TODO(), filter)
+	cursor, err := reviewsCollection.Find(ctx, filter)
 	if err != nil {
 		response.Type = "error"
 		response.Message = "Error getting restaurant reviews"
@@ -67,6 +70,8 @@ func GetRestaurantReviews(c *gin.Context) {
 Add A New Restaurant Review
 */
 func AddNewRestaurantReview(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	var response = MongoJsonResponse{}
@@ -98,7 +103,7 @@ func AddNewRestaurantReview(c *gin.Context) {
 		"createdAt":     request.CreatedAt,
 		"updatedAt":     request.UpdatedAt,
 	}
-	insertResult, err := reviewsCollection.InsertOne(context.TODO(), filter)
+	insertResult, err := reviewsCollection.InsertOne(ctx, filter)
 	if err != nil {
 		response.Type = "error"
 		response.Message = "Error adding new restaurant review"
@@ -116,6 +121,8 @@ func AddNewRestaurantReview(c *gin.Context) {
 Update Review Likes and Dislikes
 */
 func UpdateReviewLikeAndDislike(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	var response = MongoJsonResponse{}
@@ -131,7 +138,7 @@ func UpdateReviewLikeAndDislike(c *gin.Context) {
 	id, err := primitive.ObjectIDFromHex(request.ID.Hex())
 	config.CheckErr(err)
 	request.UpdatedAt = config.GetCurrentTime()
-	updateResult, err := reviewsCollection.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": bson.M{"like": request.Like, "dislike": request.Dislike, "updatedAt": request.UpdatedAt}})
+	updateResult, err := reviewsCollection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{"$set": bson.M{"like": request.Like, "dislike": request.Dislike, "updatedAt": request.UpdatedAt}})
 	if err != nil {
 		response.Type = "error"
 		response.Message = "Error updating review like and dislike"

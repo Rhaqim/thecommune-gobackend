@@ -19,7 +19,8 @@ Get User by ID
 var usersCollection = database.OpenCollection(database.ConnectMongoDB(), DB, USERS)
 
 func GetUserByID(c *gin.Context) {
-
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	var user bson.M
@@ -39,7 +40,7 @@ func GetUserByID(c *gin.Context) {
 	config.Logs("info", "ID: "+id.Hex())
 
 	filter := bson.M{"_id": id}
-	if err := usersCollection.FindOne(context.TODO(), filter).Decode(&user); err != nil {
+	if err := usersCollection.FindOne(ctx, filter).Decode(&user); err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -53,6 +54,8 @@ func GetUserByID(c *gin.Context) {
 }
 
 func CreatNewUser(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	var user = CreatUser{}
@@ -78,7 +81,7 @@ func CreatNewUser(c *gin.Context) {
 		"createdAt": user.CreatedAt,
 		"updatedAt": user.UpdatedAt,
 	}
-	insertResult, err := usersCollection.InsertOne(context.TODO(), filter)
+	insertResult, err := usersCollection.InsertOne(ctx, filter)
 	if err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -91,6 +94,9 @@ func CreatNewUser(c *gin.Context) {
 }
 
 func UpdateAvatar(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	request := UpdateUserAvatar{}
@@ -119,7 +125,7 @@ func UpdateAvatar(c *gin.Context) {
 		},
 	}
 
-	updateResult, err := usersCollection.UpdateOne(context.TODO(), filter, update)
+	updateResult, err := usersCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

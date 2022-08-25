@@ -3,6 +3,7 @@ package views
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/Rhaqim/thecommune-gobackend/pkg/config"
 	"github.com/Rhaqim/thecommune-gobackend/pkg/database"
@@ -19,12 +20,8 @@ Get All Restaurants
 var restaurantsCollection = database.OpenCollection(database.ConnectMongoDB(), DB, RESTAURANTS)
 
 func GetRestaurants(c *gin.Context) {
-
-	// client := database.ConnectMongoDB()
-
-	// defer client.Disconnect(context.TODO())
-
-	// collection := client.Database(restaurantDB).Collection(restaurantCollection)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
@@ -36,7 +33,7 @@ func GetRestaurants(c *gin.Context) {
 
 	opts := options.Find().SetProjection(bson.M{"title": 1, "description": 1, "address": 1, "images": 1, "rating": 1, "slug": 1})
 
-	cursor, err := restaurantsCollection.Find(context.TODO(), filter, opts)
+	cursor, err := restaurantsCollection.Find(ctx, filter, opts)
 	if err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -57,6 +54,8 @@ func GetRestaurants(c *gin.Context) {
 }
 
 func GetRestaurantByID(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	var restaurant bson.M
@@ -81,7 +80,7 @@ func GetRestaurantByID(c *gin.Context) {
 
 	filter := bson.M{"_id": id}
 
-	err = restaurantsCollection.FindOne(context.TODO(), filter).Decode(&restaurant)
+	err = restaurantsCollection.FindOne(ctx, filter).Decode(&restaurant)
 	if err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -96,6 +95,8 @@ func GetRestaurantByID(c *gin.Context) {
 }
 
 func CreateRestaurant(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	request := CreateRestaurants{}
@@ -131,7 +132,7 @@ func CreateRestaurant(c *gin.Context) {
 		"updatedAt":   request.UpdatedAt,
 	}
 
-	insertResult, err := restaurantsCollection.InsertOne(context.TODO(), filter)
+	insertResult, err := restaurantsCollection.InsertOne(ctx, filter)
 	if err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -147,6 +148,8 @@ func CreateRestaurant(c *gin.Context) {
 }
 
 func UpdateRestaurantAvgPrice(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	request := UpdateRestaurantAvgPriceType{}
@@ -179,7 +182,7 @@ func UpdateRestaurantAvgPrice(c *gin.Context) {
 		},
 	}
 
-	_, err = restaurantsCollection.UpdateOne(context.TODO(), filter, update)
+	_, err = restaurantsCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

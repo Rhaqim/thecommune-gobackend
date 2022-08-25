@@ -20,18 +20,20 @@ var jwtKey = []byte("supersecretkey")
 var collection *mongo.Collection = database.OpenCollection(database.ConnectMongoDB(), "lagos_restaurants", "USERS")
 
 type JWTClaim struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
+	Username string             `json:"username"`
+	Email    string             `json:"email"`
+	UserId   primitive.ObjectID `json:"userId"`
 	jwt.StandardClaims
 }
 
 var SECRET_KEY string = os.Getenv("SECRET")
 
-func GenerateJWT(email string, username string) (token string, refreshToken string, err error) {
+func GenerateJWT(email string, username string, userid primitive.ObjectID) (token string, refreshToken string, err error) {
 	expirationTime := time.Now().Add(1 * time.Hour)
 	claims := &JWTClaim{
 		Email:    email,
 		Username: username,
+		UserId:   userid,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -79,31 +81,33 @@ func ValidateToken(signedToken string) (err error) {
 	return
 }
 
-func UpdateToken(signedToken string, signedRefreshToken string, email string, username string) (token string, refreshToken string, err error) {
+func UpdateToken(signedToken string, signedRefreshToken string, email string, username string, userid primitive.ObjectID) (token string, refreshToken string, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	var updateObj primitive.D
 
-	updateObj = append(updateObj, primitive.E{Key: "token", Value: signedToken})
-	updateObj = append(updateObj, primitive.E{Key: "refreshToken", Value: signedRefreshToken})
+	updateObj = append(updateObj, bson.E{Key: "token", Value: signedToken})
+	updateObj = append(updateObj, bson.E{Key: "refreshToken", Value: signedRefreshToken})
 
 	updated_at, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-	updateObj = append(updateObj, primitive.E{Key: "updatedAt", Value: updated_at})
+	updateObj = append(updateObj, bson.E{Key: "updatedAt", Value: updated_at})
 
 	upsert := true
 
-	filter := bson.M{"email": email}
+	userid, err = primitive.ObjectIDFromHex(userid.Hex())
+
+	filter := bson.M{"_id": userid}
 	opts := options.UpdateOptions{
 		Upsert: &upsert,
 	}
 
 	_, err = collection.UpdateOne(ctx, filter, bson.D{{Key: "$set", Value: updateObj}}, &opts)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 		return
 	}
 
-	token, refreshToken, err = GenerateJWT(email, username)
+	token, refreshToken, err = GenerateJWT(email, username, userid)
 	if err != nil {
 		return
 	}
