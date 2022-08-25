@@ -15,13 +15,18 @@ import (
 /*
 Get All Restaurants
 */
+
+var restaurantsCollection = database.OpenCollection(database.ConnectMongoDB(), DB, RESTAURANTS)
+
 func GetRestaurants(c *gin.Context) {
 
-	client := database.ConnectMongoDB()
+	// client := database.ConnectMongoDB()
 
-	defer client.Disconnect(context.TODO())
+	// defer client.Disconnect(context.TODO())
 
-	collection := client.Database(restaurantDB).Collection(restaurantCollection)
+	// collection := client.Database(restaurantDB).Collection(restaurantCollection)
+
+	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	var restaurants = []bson.M{}
 
@@ -31,7 +36,7 @@ func GetRestaurants(c *gin.Context) {
 
 	opts := options.Find().SetProjection(bson.M{"title": 1, "description": 1, "address": 1, "images": 1, "rating": 1, "slug": 1})
 
-	cursor, err := collection.Find(context.TODO(), filter, opts)
+	cursor, err := restaurantsCollection.Find(context.TODO(), filter, opts)
 	if err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -52,11 +57,7 @@ func GetRestaurants(c *gin.Context) {
 }
 
 func GetRestaurantByID(c *gin.Context) {
-	client := database.ConnectMongoDB()
-
-	defer client.Disconnect(context.TODO())
-
-	collection := client.Database(restaurantDB).Collection(restaurantCollection)
+	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	var restaurant bson.M
 
@@ -80,7 +81,7 @@ func GetRestaurantByID(c *gin.Context) {
 
 	filter := bson.M{"_id": id}
 
-	err = collection.FindOne(context.TODO(), filter).Decode(&restaurant)
+	err = restaurantsCollection.FindOne(context.TODO(), filter).Decode(&restaurant)
 	if err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -95,11 +96,7 @@ func GetRestaurantByID(c *gin.Context) {
 }
 
 func CreateRestaurant(c *gin.Context) {
-	client := database.ConnectMongoDB()
-
-	defer client.Disconnect(context.TODO())
-
-	collection := client.Database(restaurantDB).Collection(restaurantCollection)
+	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	request := CreateRestaurants{}
 
@@ -136,7 +133,7 @@ func CreateRestaurant(c *gin.Context) {
 		"updatedAt":   request.UpdatedAt,
 	}
 
-	insertResult, err := collection.InsertOne(context.TODO(), filter)
+	insertResult, err := restaurantsCollection.InsertOne(context.TODO(), filter)
 	if err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -152,11 +149,7 @@ func CreateRestaurant(c *gin.Context) {
 }
 
 func UpdateRestaurantAvgPrice(c *gin.Context) {
-	client := database.ConnectMongoDB()
-
-	defer client.Disconnect(context.TODO())
-
-	collection := client.Database(restaurantDB).Collection(restaurantCollection)
+	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	request := UpdateRestaurantAvgPriceType{}
 
@@ -188,7 +181,7 @@ func UpdateRestaurantAvgPrice(c *gin.Context) {
 		},
 	}
 
-	_, err = collection.UpdateOne(context.TODO(), filter, update)
+	_, err = restaurantsCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

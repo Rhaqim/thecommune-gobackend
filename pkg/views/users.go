@@ -16,12 +16,16 @@ import (
 /*
 Get User by ID
 */
+var usersCollection = database.OpenCollection(database.ConnectMongoDB(), "lagos_restaurants", "USERS")
+
 func GetUserByID(c *gin.Context) {
-	client := database.ConnectMongoDB()
+	// client := database.ConnectMongoDB()
 
-	defer client.Disconnect(context.TODO())
+	// defer client.Disconnect(context.TODO())
 
-	collection := client.Database(restaurantDB).Collection("USERS")
+	// collection := client.Database(restaurantDB).Collection("USERS")
+
+	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	var user bson.M
 	request := GetUser{}
@@ -40,7 +44,7 @@ func GetUserByID(c *gin.Context) {
 	config.Logs("info", "ID: "+id.Hex())
 
 	filter := bson.M{"_id": id}
-	if err := collection.FindOne(context.TODO(), filter).Decode(&user); err != nil {
+	if err := usersCollection.FindOne(context.TODO(), filter).Decode(&user); err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -54,11 +58,13 @@ func GetUserByID(c *gin.Context) {
 }
 
 func CreatNewUser(c *gin.Context) {
-	client := database.ConnectMongoDB()
+	// client := database.ConnectMongoDB()
 
-	defer client.Disconnect(context.TODO())
+	// defer client.Disconnect(context.TODO())
 
-	collection := client.Database(restaurantDB).Collection("USERS")
+	// collection := client.Database(restaurantDB).Collection("USERS")
+	defer database.ConnectMongoDB().Disconnect(context.TODO())
+
 	var user = CreatUser{}
 	var response = MongoJsonResponse{}
 	if err := c.BindJSON(&user); err != nil {
@@ -82,7 +88,7 @@ func CreatNewUser(c *gin.Context) {
 		"created_at": user.Created_At,
 		"updated_at": user.Updated_At,
 	}
-	insertResult, err := collection.InsertOne(context.TODO(), filter)
+	insertResult, err := usersCollection.InsertOne(context.TODO(), filter)
 	if err != nil {
 		config.Logs("error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

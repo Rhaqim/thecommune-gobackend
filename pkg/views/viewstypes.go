@@ -3,10 +3,10 @@ package views
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 const (
-	restaurantCollection = "RESTAURANTS"
-	reviewCollection     = "REVIEWS"
-	usersCollection      = "USERS"
-	restaurantDB         = "lagos_restaurants"
+	RESTAURANTS = "RESTAURANTS"
+	REVIEWS     = "REVIEWS"
+	USERS       = "USERS"
+	DB          = "lagos_restaurants"
 )
 
 type MongoJsonResponse struct {
