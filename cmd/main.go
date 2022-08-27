@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/Rhaqim/thecommune-gobackend/pkg/handlers"
 )
 
@@ -10,7 +12,8 @@ func main() {
 	// log.Fatal(http.ListenAndServe(":8080", r))
 
 	run := handlers.GinRouter()
+	port := os.Getenv("PORT")
 
-	run.Run(":8080")
+	run.Run(port)
 
 }
