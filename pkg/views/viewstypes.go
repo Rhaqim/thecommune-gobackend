@@ -1,6 +1,11 @@
 package views
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"context"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 const (
 	RESTAURANTS = "RESTAURANTS"
@@ -81,6 +86,32 @@ type UpdateUserAvatar struct {
 type SignInStruct struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+}
+
+type User struct {
+	ID       primitive.ObjectID `bson:"_id,omitempty"`
+	Username string             `bson:"username"`
+	Email    string             `bson:"email"`
+	Password string             `bson:"password"`
+}
+
+func CheckIfEmailExists(email string) (bool, error) {
+	var user User
+	filter := bson.M{"email": email}
+	err := usersCollection.FindOne(context.TODO(), filter).Decode(&user)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func CheckIfUsernameExists(username string) (bool, error) {
+	var user User
+	err := usersCollection.FindOne(context.TODO(), bson.M{"username": username}).Decode(&user)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

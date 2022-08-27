@@ -69,6 +69,37 @@ func CreatNewUser(c *gin.Context) {
 		return
 	}
 	config.Logs("info", "User: "+user.Fullname+" "+user.Username+" "+user.Email)
+
+	checkEmail, err := CheckIfEmailExists(user.Email) // check if email exists
+	if err != nil {
+		config.Logs("error", err.Error())
+		response.Type = "error"
+		response.Message = err.Error()
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	if checkEmail {
+		response.Type = "error"
+		response.Message = "Email already exists"
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	checkUsername, err := CheckIfUsernameExists(user.Username) // check if username exists
+	if err != nil {
+		config.Logs("error", err.Error())
+		response.Type = "error"
+		response.Message = err.Error()
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	if checkUsername {
+		response.Type = "error"
+		response.Message = "Username already exists"
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
 	user.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
 	user.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
 	password, err := auth.HashAndSalt(user.Password)
