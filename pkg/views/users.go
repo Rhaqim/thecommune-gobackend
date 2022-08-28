@@ -172,13 +172,20 @@ func UpdateAvatar(c *gin.Context) {
 
 }
 
+type SigninResponse struct {
+	ID 	 primitive.ObjectID `json:"_id" bson:"_id"`
+	Email string `json:"email" bson:"email"`
+	Username string `json:"username" bson:"username"`
+	Password string `json:"password" bson:"password"`
+}
+
 func SignIn(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	defer database.ConnectMongoDB().Disconnect(context.TODO())
 
 	var request = SignInStruct{}
-	var user = SignInStruct{}
+	var user = SigninResponse{}
 	var response = MongoJsonResponse{}
 
 	if err := c.BindJSON(&request); err != nil {
@@ -198,8 +205,25 @@ func SignIn(c *gin.Context) {
 	}
 	log.Println("User: ", user)
 	if auth.CheckPasswordHash(request.Password, user.Password) {
+
+		t, rt, err := auth.GenerateJWT(user.Email, user.Username, user.ID)
+
+		if err != nil {
+			config.Logs("error", err.Error())
+			response.Type = "error"
+			response.Message = err.Error()
+			c.JSON(http.StatusBadRequest, response)
+			return
+		}
+
 		response.Type = "success"
 		response.Message = "User signed in"
+		response.Data = gin.H{
+			"token":     t,
+			"refresh":   rt,
+			"user":      user,
+			"expiresAt": time.Now().Add(time.Hour * 24).Unix(),
+		}
 		c.JSON(http.StatusOK, response)
 	} else {
 		response.Type = "error"

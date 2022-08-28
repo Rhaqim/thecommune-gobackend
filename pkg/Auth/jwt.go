@@ -15,7 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var jwtKey = []byte("supersecretkey")
+// var jwtKey = []byte("supersecretkey")
 
 var collection *mongo.Collection = database.OpenCollection(database.ConnectMongoDB(), "lagos_restaurants", "USERS")
 
@@ -45,12 +45,12 @@ func GenerateJWT(email string, username string, userid primitive.ObjectID) (toke
 		},
 	}
 
-	token, err = jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(jwtKey)
+	token, err = jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(SECRET_KEY))
 	if err != nil {
 		log.Panic(err)
 		return
 	}
-	refreshToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString(jwtKey)
+	refreshToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(SECRET_KEY))
 	if err != nil {
 		log.Panic(err)
 		return
@@ -63,7 +63,7 @@ func ValidateToken(signedToken string) (err error) {
 		signedToken,
 		&JWTClaim{},
 		func(token *jwt.Token) (interface{}, error) {
-			return []byte(jwtKey), nil
+			return []byte([]byte(SECRET_KEY)), nil
 		},
 	)
 	if err != nil {
