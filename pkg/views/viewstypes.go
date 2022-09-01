@@ -10,7 +10,7 @@ import (
 const (
 	RESTAURANTS = "RESTAURANTS"
 	REVIEWS     = "REVIEWS"
-	USERS       = "USERS"
+	USERS       = "users"
 	DB          = "lagos_restaurants"
 )
 

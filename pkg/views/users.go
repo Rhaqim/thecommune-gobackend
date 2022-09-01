@@ -173,10 +173,10 @@ func UpdateAvatar(c *gin.Context) {
 }
 
 type SigninResponse struct {
-	ID 	 primitive.ObjectID `json:"_id" bson:"_id"`
-	Email string `json:"email" bson:"email"`
-	Username string `json:"username" bson:"username"`
-	Password string `json:"password" bson:"password"`
+	ID       primitive.ObjectID `json:"_id" bson:"_id"`
+	Email    string             `json:"email" bson:"email"`
+	Username string             `json:"username" bson:"username"`
+	Password string             `json:"password" bson:"password"`
 }
 
 func SignIn(c *gin.Context) {
@@ -221,7 +221,7 @@ func SignIn(c *gin.Context) {
 		response.Data = gin.H{
 			"token":     t,
 			"refresh":   rt,
-			"user":      user,
+			"user":      user.Username,
 			"expiresAt": time.Now().Add(time.Hour * 24).Unix(),
 		}
 		c.JSON(http.StatusOK, response)
